@@ -1,0 +1,25 @@
+# Implementation Plan - Go-RIB/FIB Telemetry Streamer
+
+- [ ] **Phase 1: Project Initialization & Data Modeling**
+    - [ ] Initialize Go module (`go mod init github.com/openconfig/aft-simulator`)
+    - [ ] Create directory structure (`cmd/daemon`, `pkg/api`, `pkg/rib`, `pkg/fib`, `pkg/telemetry`, `pkg/installers`)
+    - [ ] Define core data structures in `pkg/api` (`RIBUpdate`, `FIBUpdate`, `AFTUpdate`) and `RouteInstaller` interface.
+- [ ] **Phase 2: RIB Manager Implementation**
+    - [ ] Implement `pkg/rib` package with `RIB` struct and `New()` constructor.
+    - [ ] Implement `AddRoute` and `DeleteRoute` logic with Best Path Selection (Admin Distance < Metric).
+    - [ ] Implement the main event loop to process `RIBUpdate` and emit `FIBUpdate`.
+    - [ ] Add unit tests for RIB logic.
+- [ ] **Phase 3: FIB Manager Implementation**
+    - [ ] Implement `pkg/fib` package with `FIB` struct and `New()` constructor.
+    - [ ] Implement `Update` logic to maintain `ActiveRoutes` map.
+    - [ ] Implement `GetSnapshot()` for initial state retrieval.
+    - [ ] Implement the main event loop to process `FIBUpdate` and emit `AFTUpdate`.
+    - [ ] Add unit tests for FIB logic.
+- [ ] **Phase 4: gNMI Telemetry Server**
+    - [ ] Implement `pkg/telemetry` package with `GNMIServer` struct.
+    - [ ] Implement `Subscribe` RPC handling `STREAM` mode (Snapshot + Updates).
+    - [ ] Implement helper to convert `AFTUpdate` to `gnmi.Notification`.
+- [ ] **Phase 5: Integration & Mocking**
+    - [ ] Create `pkg/installers/mock` with a mock `RouteInstaller`.
+    - [ ] Implement `cmd/daemon/main.go` to wire everything together.
+    - [ ] Verify end-to-end functionality.
