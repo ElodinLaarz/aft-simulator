@@ -19,7 +19,7 @@ func TestRIB_AddRoute_BestPath(t *testing.T) {
 	// 1. Add Static Route (AD 1, Metric 10)
 	r.AddRoute(api.RIBUpdate{
 		Action:    api.Add,
-		Protocol:  "STATIC",
+		Protocol:  api.ProtocolStatic,
 		Prefix:    prefix,
 		NextHop:   nh1,
 		Metric:    10,
@@ -41,7 +41,7 @@ func TestRIB_AddRoute_BestPath(t *testing.T) {
 	// 2. Add OSPF Route (AD 110, Metric 20) - Should NOT trigger update (worse AD)
 	r.AddRoute(api.RIBUpdate{
 		Action:    api.Add,
-		Protocol:  "OSPF",
+		Protocol:  api.ProtocolOSPF,
 		Prefix:    prefix,
 		NextHop:   nh2,
 		Metric:    20,
@@ -74,15 +74,15 @@ func TestRIB_DeleteRoute_PromoteNextBest(t *testing.T) {
 	nhOSPF := netip.MustParseAddr("192.168.1.2")
 
 	// Add Static (Best)
-	r.AddRoute(api.RIBUpdate{Protocol: "STATIC", Prefix: prefix, NextHop: nhStatic, AdminDist: 1})
+	r.AddRoute(api.RIBUpdate{Protocol: api.ProtocolStatic, Prefix: prefix, NextHop: nhStatic, AdminDist: 1})
 	<-fibChan // Consume
 
 	// Add OSPF (Backup)
-	r.AddRoute(api.RIBUpdate{Protocol: "OSPF", Prefix: prefix, NextHop: nhOSPF, AdminDist: 110})
+	r.AddRoute(api.RIBUpdate{Protocol: api.ProtocolOSPF, Prefix: prefix, NextHop: nhOSPF, AdminDist: 110})
 	<-fibChan // Consume (or ignore if optimized)
 
 	// Delete Static
-	r.DeleteRoute(api.RIBUpdate{Protocol: "STATIC", Prefix: prefix})
+	r.DeleteRoute(api.RIBUpdate{Protocol: api.ProtocolStatic, Prefix: prefix})
 
 	select {
 	case update := <-fibChan:
@@ -102,10 +102,10 @@ func TestRIB_DeleteAllRoutes(t *testing.T) {
 	r := New(fibChan)
 	prefix := netip.MustParsePrefix("30.0.0.0/24")
 
-	r.AddRoute(api.RIBUpdate{Protocol: "STATIC", Prefix: prefix, AdminDist: 1})
+	r.AddRoute(api.RIBUpdate{Protocol: api.ProtocolStatic, Prefix: prefix, AdminDist: 1})
 	<-fibChan
 
-	r.DeleteRoute(api.RIBUpdate{Protocol: "STATIC", Prefix: prefix})
+	r.DeleteRoute(api.RIBUpdate{Protocol: api.ProtocolStatic, Prefix: prefix})
 
 	select {
 	case update := <-fibChan:

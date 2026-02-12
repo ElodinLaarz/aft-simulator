@@ -38,7 +38,7 @@ func (m *MockInstaller) Start(ribChan chan<- api.RIBUpdate) error {
 			fmt.Println("MockInstaller: Injecting Route 1 (ADD)")
 			ribChan <- api.RIBUpdate{
 				Action:    api.Add,
-				Protocol:  "MOCK",
+				Protocol:  api.ProtocolMock,
 				Prefix:    p1,
 				NextHop:   nh1,
 				Metric:    10,
@@ -53,7 +53,7 @@ func (m *MockInstaller) Start(ribChan chan<- api.RIBUpdate) error {
 			fmt.Println("MockInstaller: Injecting Route 2 (ADD)")
 			ribChan <- api.RIBUpdate{
 				Action:    api.Add,
-				Protocol:  "MOCK",
+				Protocol:  api.ProtocolMock,
 				Prefix:    p2,
 				NextHop:   nh2,
 				Metric:    10,
@@ -68,7 +68,7 @@ func (m *MockInstaller) Start(ribChan chan<- api.RIBUpdate) error {
 			fmt.Println("MockInstaller: Deleting Route 1")
 			ribChan <- api.RIBUpdate{
 				Action:   api.Delete,
-				Protocol: "MOCK",
+				Protocol: api.ProtocolMock,
 				Prefix:   p1,
 			}
 		case <-m.stopChan:
