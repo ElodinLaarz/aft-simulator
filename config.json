@@ -1,0 +1,8 @@
+{
+  "gnmi_port": 50099,
+  "mock_installer": {
+    "enabled": true,
+    "route_count": 5000,
+    "churn_rate": 500
+  }
+}

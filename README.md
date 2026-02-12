@@ -17,16 +17,37 @@ The `aft-simulator` demonstrates a decoupled routing system architecture:
 *   `pkg/fib`: FIB implementation (Active State).
 *   `pkg/telemetry`: gNMI Server implementation.
 *   `pkg/installers`: Route injectors (currently `mock`).
+*   `pkg/config`: Configuration loading logic.
+
+## Configuration
+
+The simulator can be configured via a JSON file. By default, it looks for `config.json` in the current directory, or you can specify one with the `-config` flag.
+
+**Example `config.json`:**
+```json
+{
+  "gnmi_port": 50099,
+  "mock_installer": {
+    "enabled": true,
+    "route_count": 1000,
+    "churn_rate": 100
+  }
+}
+```
 
 ## Running
 
 ```bash
+# Run with default config (config.json)
 go run ./cmd/daemon
+
+# Run with custom config
+go run ./cmd/daemon -config my_config.json
 ```
 
 ## gNMI Telemetry
 
-The daemon listens on port `50099` (TCP).
+The daemon listens on the configured port (default `50099`) (TCP).
 You can subscribe to AFT updates using a gNMI client (e.g., `gnmic`).
 
 ```bash
