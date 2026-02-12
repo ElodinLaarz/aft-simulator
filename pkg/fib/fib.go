@@ -1,6 +1,7 @@
 package fib
 
 import (
+	"context"
 	"fmt"
 	"hash/fnv"
 	"net/netip"
@@ -29,9 +30,18 @@ func New(telemetryChan chan<- api.AFTUpdate) *FIB {
 }
 
 // Start listens for updates on the input channel and processes them.
-func (f *FIB) Start(inputChan <-chan api.FIBUpdate) {
-	for update := range inputChan {
-		f.Update(update)
+func (f *FIB) Start(ctx context.Context, inputChan <-chan api.FIBUpdate) error {
+	defer close(f.telemetryChan)
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case update, ok := <-inputChan:
+			if !ok {
+				return nil
+			}
+			f.Update(update)
+		}
 	}
 }
 

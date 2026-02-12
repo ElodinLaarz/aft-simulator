@@ -1,6 +1,7 @@
 package rib
 
 import (
+	"context"
 	"fmt"
 	"net/netip"
 	"sync"
@@ -32,13 +33,22 @@ func New(fibChan chan<- api.FIBUpdate) *RIB {
 }
 
 // Start listens for updates on the input channel and processes them.
-func (r *RIB) Start(inputChan <-chan api.RIBUpdate) {
-	for update := range inputChan {
-		switch update.Action {
-		case api.Add:
-			r.AddRoute(update)
-		case api.Delete:
-			r.DeleteRoute(update)
+func (r *RIB) Start(ctx context.Context, inputChan <-chan api.RIBUpdate) error {
+	defer close(r.fibChan)
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case update, ok := <-inputChan:
+			if !ok {
+				return nil
+			}
+			switch update.Action {
+			case api.Add:
+				r.AddRoute(update)
+			case api.Delete:
+				r.DeleteRoute(update)
+			}
 		}
 	}
 }

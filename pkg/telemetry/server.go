@@ -1,6 +1,7 @@
 package telemetry
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"sync"
@@ -28,13 +29,27 @@ type GNMIServer struct {
 
 // New creates a new GNMIServer.
 func New(f *fib.FIB, telemetryChan <-chan api.AFTUpdate) *GNMIServer {
-	s := &GNMIServer{
+	return &GNMIServer{
 		fib:           f,
 		telemetryChan: telemetryChan,
 		subscribers:   make(map[int64]chan api.AFTUpdate),
 	}
-	go s.broadcastLoop()
-	return s
+}
+
+// Run listens for updates on the telemetry channel and broadcasts them to subscribers.
+// It blocks until the context is canceled or the channel is closed.
+func (s *GNMIServer) Run(ctx context.Context) error {
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case update, ok := <-s.telemetryChan:
+			if !ok {
+				return nil
+			}
+			s.sendToSubscribers(update)
+		}
+	}
 }
 
 func (s *GNMIServer) sendToSubscribers(update api.AFTUpdate) {
@@ -46,12 +61,6 @@ func (s *GNMIServer) sendToSubscribers(update api.AFTUpdate) {
 		default:
 			go log.Printf("GNMIServer: subscriber channel full unable to send to subscriber %d", id)
 		}
-	}
-}
-
-func (s *GNMIServer) broadcastLoop() {
-	for update := range s.telemetryChan {
-		s.sendToSubscribers(update)
 	}
 }
 
